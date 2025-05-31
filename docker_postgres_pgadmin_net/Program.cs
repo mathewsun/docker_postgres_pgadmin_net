@@ -1,3 +1,6 @@
+using docker_postgres_pgadmin_net.Data;
+using Microsoft.EntityFrameworkCore;
+
 namespace docker_postgres_pgadmin_net
 {
     public class Program
@@ -7,8 +10,14 @@ namespace docker_postgres_pgadmin_net
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            builder.Services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseNpgsql(connectionString));
 
             builder.Services.AddControllers();
+
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
 
             var app = builder.Build();
 
@@ -16,6 +25,11 @@ namespace docker_postgres_pgadmin_net
 
             app.UseAuthorization();
 
+            //if (app.Environment.IsDevelopment())
+            //{
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            //}
 
             app.MapControllers();
 
