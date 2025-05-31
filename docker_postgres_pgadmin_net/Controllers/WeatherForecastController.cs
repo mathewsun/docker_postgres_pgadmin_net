@@ -1,3 +1,5 @@
+using docker_postgres_pgadmin_net.Data;
+using docker_postgres_pgadmin_net.Model;
 using Microsoft.AspNetCore.Mvc;
 
 namespace docker_postgres_pgadmin_net.Controllers
@@ -11,10 +13,12 @@ namespace docker_postgres_pgadmin_net.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
+        private ApplicationDbContext _context;
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ApplicationDbContext context, ILogger<WeatherForecastController> logger)
         {
+            _context = context;
             _logger = logger;
         }
 
@@ -28,6 +32,18 @@ namespace docker_postgres_pgadmin_net.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+        }
+
+        [HttpPost]
+        [Route("addcity")]
+        public async Task<int> AddCity(string name)
+        {
+            City city = new City { Name = name };
+
+            _context.Cities.Add(city);
+            await _context.SaveChangesAsync();
+
+            return 0;
         }
     }
 }
